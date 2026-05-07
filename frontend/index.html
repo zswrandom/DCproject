@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校汇通 - 视频会议</title>
+    <style>
+        /* ========== 基础重置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========== 顶部标题栏 ========== */
+        .header {
+            background-color: #16213e;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #0f3460;
+        }
+        .header h1 {
+            font-size: 20px;
+            color: #e94560;
+        }
+        .header .room-info {
+            font-size: 14px;
+            color: #a0a0b0;
+        }
+
+        /* ========== 主内容区（左右分栏） ========== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* -------- 左侧视频区 -------- */
+        .video-section {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        /* 主视频窗口 */
+        .main-video {
+            flex: 1;
+            background-color: #0f3460;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 300px;
+        }
+        .main-video video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            display: none;
+        }
+        .main-video .placeholder-text {
+            position: absolute;
+            color: #a0a0b0;
+            font-size: 18px;
+        }
+
+        /* 远端视频网格 */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            height: 150px;
+        }
+        .video-grid .mini-video {
+            background-color: #0f3460;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0a0b0;
+            font-size: 14px;
+        }
+
+        /* -------- 右侧侧边栏 -------- */
+        .sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #0f3460;
+            min-width: 280px;
+        }
+
+        /* 参与者列表 */
+        .participants {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        .participants h3 {
+            margin-bottom: 12px;
+            color: #e94560;
+            font-size: 16px;
+        }
+        .participant-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 8px;
+            background-color: #16213e;
+            border-radius: 8px;
+        }
+        .participant-item .avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #e94560;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 14px;
+        }
+        .participant-item .name {
+            font-size: 14px;
+        }
+
+        /* 聊天区 */
+        .chat {
+            flex: 1;
+            padding: 16px;
+            border-top: 1px solid #0f3460;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat h3 {
+            margin-bottom: 12px;
+            color: #e94560;
+            font-size: 16px;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            background-color: #16213e;
+            border-radius: 8px;
+            padding: 12px;
+            color: #a0a0b0;
+            font-size: 14px;
+        }
+        .chat-messages p {
+            margin-bottom: 4px;
+        }
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+        }
+        .chat-input-area input::placeholder {
+            color: #a0a0b0;
+        }
+        .chat-input-area button {
+            padding: 8px 16px;
+            background-color: #e94560;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* ========== 底部控制栏 ========== */
+        .controls {
+            background-color: #16213e;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            border-top: 1px solid #0f3460;
+            flex-wrap: wrap;
+        }
+        .controls input {
+            padding: 8px 12px;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            background-color: #1a1a2e;
+            color: #ffffff;
+            font-size: 14px;
+            width: 200px;
+            outline: none;
+        }
+        .controls input::placeholder {
+            color: #a0a0b0;
+        }
+        .controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .btn-join {
+            background-color: #e94560;
+            color: #ffffff;
+        }
+        .btn-join:hover {
+            background-color: #c73a54;
+        }
+        .btn-camera {
+            background-color: #0f3460;
+            color: #ffffff;
+        }
+        .btn-camera:hover {
+            background-color: #1a4a7a;
+        }
+        .btn-ai {
+            background-color: #0f3460;
+            color: #ffffff;
+        }
+        .btn-ai:hover {
+            background-color: #1a4a7a;
+        }
+
+        /* AI 结果展示区 */
+        .ai-result {
+            width: 100%;
+            background-color: #0f3460;
+            color: #a0a0b0;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+        .ai-result pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========== 顶部标题栏 ========== -->
+    <div class="header">
+        <h1>校汇通</h1>
+        <div class="room-info">
+            房间号：<span id="roomDisplay">未加入</span>
+        </div>
+    </div>
+
+    <!-- ========== 主内容区 ========== -->
+    <div class="main-content">
+
+        <!-- 左侧视频区 -->
+        <div class="video-section">
+            <!-- 主视频窗口 -->
+            <div class="main-video" id="mainVideoContainer">
+                <span class="placeholder-text" id="videoPlaceholder">点击下方"开启摄像头"预览画面</span>
+                <video id="localVideo" autoplay muted playsinline></video>
+            </div>
+            <!-- 远端视频网格（占位） -->
+            <div class="video-grid">
+                <div class="mini-video">参与者 2</div>
+                <div class="mini-video">参与者 3</div>
+                <div class="mini-video">参与者 4</div>
+            </div>
+        </div>
+
+        <!-- 右侧侧边栏 -->
+        <div class="sidebar">
+            <!-- 参与者列表（占位） -->
+            <div class="participants">
+                <h3>参与者 (4)</h3>
+                <div class="participant-item">
+                    <div class="avatar">我</div>
+                    <div class="name">张三（本人）</div>
+                </div>
+                <div class="participant-item">
+                    <div class="avatar">李</div>
+                    <div class="name">李四</div>
+                </div>
+                <div class="participant-item">
+                    <div class="avatar">王</div>
+                    <div class="name">王五</div>
+                </div>
+                <div class="participant-item">
+                    <div class="avatar">赵</div>
+                    <div class="name">赵六</div>
+                </div>
+            </div>
+
+            <!-- 聊天区（占位） -->
+            <div class="chat">
+                <h3>会议聊天</h3>
+                <div class="chat-messages">
+                    <p>系统：欢迎加入会议</p>
+                    <p>张三：大家好</p>
+                    <p>李四：会议开始了吗？</p>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" placeholder="输入消息..." disabled>
+                    <button disabled>发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 底部控制栏 ========== -->
+    <div class="controls">
+        <input type="text" id="roomInput" placeholder="请输入房间号">
+        <button class="btn-join" id="joinBtn">加入会议</button>
+        <button class="btn-camera" id="cameraBtn">开启摄像头</button>
+        <button class="btn-ai" id="testAiBtn">测试 AI 接口</button>
+        <!-- AI 结果展示区 -->
+        <div class="ai-result" id="aiResult">
+            <pre id="aiResultContent"></pre>
+        </div>
+    </div>
+    <!-- 引入任务2的摄像头脚本 -->
+    <script src="camera.js"></script>
+</body>
+</html>
