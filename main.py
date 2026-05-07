@@ -5,6 +5,7 @@
 """
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
@@ -17,6 +18,17 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# 允许前端跨域访问
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ============================================================
+# 第一部分：定义请求和响应的数据格式（Pydantic 模型）
+# 以下内容保持不变...
 
 # ============================================================
 # 第一部分：定义请求和响应的数据格式（Pydantic 模型）
